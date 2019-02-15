@@ -6,10 +6,10 @@ chai.should();
 
 describe("bankgirot", () => {
   describe("order without payments", () => {
-    const order = new Order("490-2201", []);
-
-    describe("toPosts()", () => {
-      it("should have", () => order.toPosts().should.deep.equal([]));
+    it("should throw an exception", () => {
+      chai.should().throw(() => {
+        new Order("490-2201", []); // tslint:disable-line
+      });
     });
   });
 

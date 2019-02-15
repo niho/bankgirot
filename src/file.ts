@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import * as stream from "stream";
 import { Order } from "./order";
 import { dateStr, timeStr } from "./utils";
 
@@ -50,12 +50,11 @@ export class File {
     );
   }
 
-  public write(path: string = ".") {
-    const file = fs.createWriteStream(path + this.filename);
+  public write(file: stream.Writable) {
     this.orders.forEach(order => {
       order.toPosts().forEach(post => {
         file.write(post, "latin1");
-        file.write("\r\n");
+        file.write("\r\n", "latin1");
       });
     });
     file.end();

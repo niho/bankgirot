@@ -1,4 +1,5 @@
 import * as chai from "chai";
+import * as stream from "stream";
 import { File, TransferMethod } from "../src/file";
 import { Order } from "../src/order";
 import { Payment } from "../src/payment";
@@ -7,40 +8,47 @@ chai.should();
 
 describe("bankgirot", () => {
   describe("file", () => {
-    const date = new Date("2019-02-15T12:00:00Z");
     const customerNumber = "123456";
 
-    describe("write stream", () => {
-      it("should be ASCII");
-      it("should use ISO8859-1");
-      it("should use <CRLF> between posts");
-
-      describe("without orders", () => {
-        it("should throw an exception", () => {
-          chai.should().throw(() => {
-            const file = new File(customerNumber, []);
-            file.write();
-          });
+    describe("without orders", () => {
+      it("should throw an exception", () => {
+        chai.should().throw(() => {
+          new File(customerNumber, []); // tslint:disable-line
         });
       });
+    });
 
-      describe("with orders", () => {
-        const payments = [
-          new Payment("123-4567", "99991234567890001", 1000),
-          new Payment("123-8901", "99991234567890002", 1230)
-        ];
-        const file = new File(customerNumber, [
-          new Order("490-2201", payments),
-          new Order("490-22012", payments)
-        ]);
+    describe("with orders", () => {
+      const payments = [
+        new Payment("123-4567", "99991234567890001", 1000),
+        new Payment("123-8901", "99991234567890002", 1230)
+      ];
+      const file = new File(customerNumber, [
+        new Order("490-2201", payments),
+        new Order("490-22012", payments)
+      ]);
 
-        it("should write to a path", () => {
-          file.write("./");
+      describe("write stream", () => {
+        it("should be ASCII");
+        it("should use ISO8859-1");
+        it("should use <CRLF> between posts");
+
+        it("should write to a stream", done => {
+          const writable = new stream.Writable({
+            write(chunk, encoding, callback) {
+              chunk.length.should.equal(80);
+              encoding.should.equal("latin1");
+              callback();
+            }
+          });
+          writable.on("end", done);
+          file.write(writable);
         });
       });
     });
 
     describe("filename", () => {
+      const date = new Date("2019-02-15T12:00:00Z");
       const filename = File.filename(
         TransferMethod.FileTransfer,
         customerNumber,

@@ -26,6 +26,9 @@ export class Order {
     info?: IInfo,
     headers?: IHeaders
   ) {
+    if (payments.length === 0) {
+      throw new Error("Empty orders with no payments is not allowed.");
+    }
     this.bankgiroNr = bankgiroNr;
     this.payments = payments;
     this.date = new Date();
