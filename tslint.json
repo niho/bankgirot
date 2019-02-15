@@ -1,0 +1,16 @@
+{
+  "extends": ["tslint:recommended"],
+  "rules": {
+    "trailing-comma": false,
+    "object-literal-sort-keys": false,
+    "arrow-parens": false,
+    "variable-name": {
+      "options": [
+        "ban-keywords",
+        "check-format",
+        "allow-leading-underscore",
+        "allow-pascal-case"
+      ]
+    }
+  }
+}

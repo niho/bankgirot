@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+src/*.js
+package-lock.json
+*~
+.nyc_output
