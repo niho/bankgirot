@@ -1,5 +1,6 @@
 import * as stream from "stream";
 import { Order } from "./order";
+import { Seal } from "./seal";
 import { dateStr, timeStr } from "./utils";
 
 export enum TransferMethod {
@@ -10,7 +11,7 @@ export enum TransferMethod {
   Test = "IZZZZ"
 }
 
-export class File {
+export class File extends stream.Readable {
   public static filename(
     transferMethod: TransferMethod,
     customerNumber: string,
@@ -28,14 +29,17 @@ export class File {
   public readonly transferMethod: TransferMethod;
   public readonly customerNumber: string;
   public readonly date: Date;
+  public readonly seal: Seal;
   public readonly orders: Order[];
   public readonly filename: string;
 
   constructor(
     customerNumber: string,
+    seal: Seal,
     orders: Order[],
     transferMethod: TransferMethod = TransferMethod.FileTransfer
   ) {
+    super();
     if (orders.length === 0) {
       throw new Error("Empty files with no orders is not allowed.");
     }
@@ -43,6 +47,7 @@ export class File {
     this.transferMethod = transferMethod;
     this.customerNumber = customerNumber;
     this.orders = orders;
+    this.seal = seal;
     this.filename = File.filename(
       this.transferMethod,
       this.customerNumber,
@@ -50,13 +55,19 @@ export class File {
     );
   }
 
-  public write(file: stream.Writable) {
+  public _read(_size: number) {
+    const encoding = "latin1";
+    this.seal.update(this.seal.startPost(), encoding);
+    this.push(this.seal.startPost(), encoding);
+    this.push("\r\n", encoding);
     this.orders.forEach(order => {
       order.toPosts().forEach(post => {
-        file.write(post, "latin1");
-        file.write("\r\n", "latin1");
+        this.seal.update(post, encoding);
+        this.push(post, encoding);
+        this.push("\r\n", encoding);
       });
     });
-    file.end();
+    this.push(this.seal.endPost(), encoding);
+    this.push(null);
   }
 }

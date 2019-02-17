@@ -1,19 +1,20 @@
 import * as chai from "chai";
-import * as stream from "stream";
 import { File, TransferMethod } from "../src/file";
 import { Order } from "../src/order";
 import { Payment } from "../src/payment";
+import { HashType, Seal } from "../src/seal";
 
 chai.should();
 
 describe("bankgirot", () => {
   describe("file", () => {
     const customerNumber = "123456";
+    const seal = new Seal(HashType.HMAC_SHA_256, new Date(), "");
 
     describe("without orders", () => {
       it("should throw an exception", () => {
         chai.should().throw(() => {
-          new File(customerNumber, []); // tslint:disable-line
+          new File(customerNumber, seal, []); // tslint:disable-line
         });
       });
     });
@@ -23,26 +24,26 @@ describe("bankgirot", () => {
         new Payment("123-4567", "99991234567890001", 1000),
         new Payment("123-8901", "99991234567890002", 1230)
       ];
-      const file = new File(customerNumber, [
+      const file = new File(customerNumber, seal, [
         new Order("490-2201", payments),
         new Order("490-22012", payments)
       ]);
 
-      describe("write stream", () => {
+      describe("stream", () => {
         it("should be ASCII");
         it("should use ISO8859-1");
         it("should use <CRLF> between posts");
 
         it("should write to a stream", done => {
-          const writable = new stream.Writable({
-            write(chunk, encoding, callback) {
-              chunk.length.should.equal(80);
-              encoding.should.equal("latin1");
-              callback();
-            }
-          });
-          writable.on("end", done);
-          file.write(writable);
+          // const writable = new stream.Writable({
+          //   write(chunk, encoding, callback) {
+          //     chunk.length.should.equal(80);
+          //     encoding.should.equal("latin1");
+          //     callback();
+          //   }
+          // });
+          // writable.on("end", done);
+          file.on("end", done).pipe(process.stdout);
         });
       });
     });

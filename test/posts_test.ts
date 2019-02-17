@@ -5,6 +5,154 @@ chai.should();
 
 describe("bankgirot", () => {
   describe("transaction posts", () => {
+    describe("seal start (TK00)", () => {
+      const date = new Date("2019-02-15T12:00:00Z");
+      describe("position 1-2", () => {
+        it("should equal '00'", () =>
+          bankgirot
+            .sealStart(date)
+            .slice(0, 2)
+            .should.equal("00"));
+      });
+
+      describe("position 3-8", () => {
+        it("should equal the key date", () =>
+          bankgirot
+            .sealStart(date)
+            .slice(2, 8)
+            .should.equal("190215"));
+      });
+
+      describe("position 9-12", () => {
+        describe("with hash type HMAC SHA256", () => {
+          it("should equal 'HMAC'", () =>
+            bankgirot
+              .sealStart(date, bankgirot.HashType.HMAC_SHA_256)
+              .slice(8, 12)
+              .should.equal("HMAC"));
+        });
+
+        describe("with hash type Nexus Electronic Sigill", () => {
+          it("should equal 'SAK1'", () =>
+            bankgirot
+              .sealStart(date, bankgirot.HashType.NexusElectronicSeal)
+              .slice(8, 12)
+              .should.equal("SAK1"));
+        });
+      });
+
+      describe("position 13-80", () => {
+        it("should be blank spaces", () =>
+          bankgirot
+            .sealStart(date)
+            .slice(12, 80)
+            .should.match(/^[ ]{68}$/));
+      });
+
+      it("should be exactly 80 characters long", () =>
+        bankgirot.sealStart(date).length.should.equal(80));
+    });
+
+    describe("seal end (TK99)", () => {
+      const date = new Date("2019-02-15T12:00:00Z");
+
+      describe("Nexus Electronic Seal", () => {
+        describe("position 1-2", () => {
+          it("should equal '99'", () =>
+            bankgirot
+              .sealNexus(date, "", "")
+              .slice(0, 2)
+              .should.equal("99"));
+        });
+
+        describe("position 3-8", () => {
+          it("should equal the key date", () =>
+            bankgirot
+              .sealNexus(date, "", "")
+              .slice(2, 8)
+              .should.equal("190215"));
+        });
+
+        describe("position 9-26", () => {
+          it("should equal the hash", () =>
+            bankgirot
+              .sealNexus(date, "123456789012345678", "")
+              .slice(8, 26)
+              .should.equal("123456789012345678"));
+        });
+
+        describe("position 27-33", () => {
+          it("should equal the seal info", () =>
+            bankgirot
+              .sealNexus(date, "", "abcdefg")
+              .slice(26, 33)
+              .should.equal("abcdefg"));
+        });
+
+        describe("position 34-80", () => {
+          it("should be blank spaces", () =>
+            bankgirot
+              .sealNexus(date, "", "")
+              .slice(33, 80)
+              .should.match(/^[ ]{47}$/));
+        });
+
+        it("should be exactly 80 characters long", () =>
+          bankgirot.sealNexus(date, "", "").length.should.equal(80));
+      });
+
+      describe("HMAC SHA256", () => {
+        describe("position 1-2", () => {
+          it("should equal '99'", () =>
+            bankgirot
+              .sealHMAC(date, "", "")
+              .slice(0, 2)
+              .should.equal("99"));
+        });
+
+        describe("position 3-8", () => {
+          it("should equal the key date", () =>
+            bankgirot
+              .sealHMAC(date, "", "")
+              .slice(2, 8)
+              .should.equal("190215"));
+        });
+
+        describe("position 9-40", () => {
+          it("should equal the KVV", () =>
+            bankgirot
+              .sealHMAC(date, "12345678901234567890123456789012", "")
+              .slice(8, 40)
+              .should.equal("12345678901234567890123456789012"));
+        });
+
+        describe("position 41-72", () => {
+          it("should equal the hash", () =>
+            bankgirot
+              .sealHMAC(date, "", "12345678901234567890123456789012")
+              .slice(40, 72)
+              .should.equal("12345678901234567890123456789012"));
+        });
+
+        describe("position 73-80", () => {
+          it("should be blank spaces", () =>
+            bankgirot
+              .sealHMAC(date, "", "")
+              .slice(72, 80)
+              .should.equal("        "));
+        });
+
+        it("should be exactly 80 characters long", () =>
+          bankgirot
+            .sealHMAC(
+              date,
+              "123456789012345678901234567890121234567890123456789012345678901",
+              "123456789012345678901234567890121234567890123456789012345678901"
+            )
+            .length.should.equal(80));
+      });
+    });
+
     describe("opening (TK11)", () => {
       const bankgiroNr = "490-2201";
       const date = new Date("2019-02-15T12:00:00Z");

@@ -7,7 +7,7 @@ TEST=test/*_test.ts
 all: setup format lint build test
 
 build: $(SRC)
-	$(BIN)/tsc --outDir dist --project . --pretty
+	$(BIN)/tsc --outDir dist --project . --pretty --declaration
 
 lint: $(SRC)
 	$(BIN)/prettier -l $(SRC) $(TEST)

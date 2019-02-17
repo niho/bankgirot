@@ -2,6 +2,8 @@ import { sprintf } from "sprintf-js";
 import { bankgiroNumber, dateStr } from "./utils";
 
 enum TransactionCode {
+  SealStart = 0,
+  SealEnd = 99,
   Opening = 11,
   FixedInformation = 12,
   Headings = 12,
@@ -18,6 +20,42 @@ enum TransactionCode {
   PlusgiroPayment = 54,
   PlusgiroInformation = 65
 }
+
+export enum HashType {
+  NexusElectronicSeal = "SAK1",
+  HMAC_SHA_256 = "HMAC"
+}
+
+export const sealStart = (
+  keyDate: Date,
+  hashType: HashType = HashType.HMAC_SHA_256
+) =>
+  sprintf(
+    "%02d%-6s%-4s%-68s",
+    TransactionCode.SealStart,
+    dateStr(keyDate),
+    hashType,
+    ""
+  );
+
+export const sealNexus = (keyDate: Date, hash: string, sealInfo: string) =>
+  sprintf(
+    "%02d%-6s%-18s%-7s%-47s",
+    TransactionCode.SealEnd,
+    dateStr(keyDate),
+    hash.slice(0, 18),
+    sealInfo.slice(0, 7),
+    ""
+  );
+
+export const sealHMAC = (keyDate: Date, kvv: string, hash: string) =>
+  sprintf(
+    "%02d%-6s%-32s%-32s        ",
+    TransactionCode.SealEnd,
+    dateStr(keyDate),
+    kvv.slice(0, 32),
+    hash.slice(0, 32)
+  );
 
 export const opening = (
   bankgiroNr: string,
