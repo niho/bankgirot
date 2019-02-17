@@ -21,7 +21,7 @@ describe("bankgirot", () => {
     const order = new Order("490-2201", payments);
 
     describe("toPosts()", () => {
-      it("should have", () => order.toPosts().should.deep.equal([]));
+      it("should return posts", () => order.toPosts().length.should.equal(4));
     });
   });
 });
