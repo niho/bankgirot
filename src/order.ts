@@ -52,7 +52,12 @@ export class Order {
             : ""
         ]
           .filter(post => (post === "" ? false : true))
-          .concat(this.payments.map(payment => payment.toPosts()))
+          .concat(
+            this.payments.reduce(
+              (acc, payment) => acc.concat(payment.toPosts()),
+              [] as string[]
+            )
+          )
           .concat([
             posts.summary(
               this.bankgiroNr,

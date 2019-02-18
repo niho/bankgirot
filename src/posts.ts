@@ -16,7 +16,6 @@ enum TransactionCode {
   Address = 27,
   Summary = 29,
   AccountNumber = 40,
-  AccountNumberPayroll = 41,
   PlusgiroPayment = 54,
   PlusgiroInformation = 65
 }
@@ -92,20 +91,103 @@ export const headings = (specHeader: string, amountHeader: string) =>
   );
 
 export const payment = (
-  bankgiroNr: string,
+  accountNr: number,
   ocrRef: string,
   amount: number,
   paymentDate?: Date,
-  infoText?: string
+  infoToSender?: string
 ) =>
   sprintf(
     "%02d%010d%-25s%012d%-6s     %-20s",
     TransactionCode.Payment,
-    bankgiroNumber(bankgiroNr),
-    ocrRef,
+    accountNr,
+    ocrRef.slice(0, 25),
     amount * 100,
     paymentDate ? dateStr(paymentDate) : "GENAST",
-    infoText ? infoText : ""
+    infoToSender ? infoToSender.slice(0, 20) : ""
+  );
+
+export const debit = (
+  id: number,
+  ocrRef: string,
+  amount: number,
+  debitDate?: Date,
+  infoToSender?: string
+) =>
+  sprintf(
+    "%02d%010d%-25s%012d%-6s     %-20s",
+    TransactionCode.Debit,
+    id,
+    ocrRef.slice(0, 25),
+    Math.abs(amount * 100),
+    debitDate ? dateStr(debitDate) : "GENAST",
+    infoToSender ? infoToSender.slice(0, 20) : ""
+  );
+
+export const credit = (
+  id: number,
+  ocrRef: string,
+  amount: number,
+  creditDate?: Date,
+  infoToSender?: string
+) =>
+  sprintf(
+    "%02d%010d%-25s%012d%-6s     %-20s",
+    amount < 0 ? TransactionCode.Credit : TransactionCode.Credit2,
+    id,
+    ocrRef.slice(0, 25),
+    Math.abs(amount * 100),
+    creditDate ? dateStr(creditDate) : "GENAST",
+    infoToSender ? infoToSender.slice(0, 20) : ""
+  );
+
+export const information = (id: number, infoText: string) =>
+  sprintf(
+    "%02d%010d%-50s                  ",
+    TransactionCode.Information,
+    id,
+    infoText.slice(0, 50)
+  );
+
+export const name = (id: number, nameStr: string, extraText?: string) =>
+  sprintf(
+    "%02d0000%06d%-35s%-33s",
+    TransactionCode.Name,
+    id,
+    nameStr.toUpperCase().slice(0, 35),
+    extraText ? extraText.slice(0, 33) : ""
+  );
+
+export const address = (
+  id: number,
+  street: string,
+  postalCode: string,
+  city: string
+) =>
+  sprintf(
+    "%02d0000%06d%-35s%05d%-20s        ",
+    TransactionCode.Address,
+    id,
+    street.toUpperCase().slice(0, 35),
+    parseInt(postalCode.replace(" ", "").slice(0, 5), 10),
+    city.toUpperCase().slice(0, 20)
+  );
+
+export const accountNumber = (
+  id: number,
+  clearingNr: string,
+  accountNr: string,
+  message: string,
+  payroll: boolean
+) =>
+  sprintf(
+    "%02d0000%06d%04d%012d%-12s%-1s                                       ",
+    TransactionCode.Address,
+    id,
+    parseInt(clearingNr.replace(" ", "").slice(0, 4), 10),
+    parseInt(accountNr.replace(" ", "").slice(0, 12), 10),
+    message.slice(0, 12),
+    payroll ? "L" : " "
   );
 
 export const summary = (

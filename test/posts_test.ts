@@ -343,34 +343,34 @@ describe("bankgirot", () => {
       describe("position 1-2", () => {
         it("should equal '14'", () =>
           bankgirot
-            .payment("490-2201", "123456", 100)
+            .payment(4902201, "123456", 100)
             .slice(0, 2)
             .should.equal("14"));
       });
       describe("position 3-12", () => {
         it("should equal the account number", () =>
           bankgirot
-            .payment("490-2201", "123456", 100)
+            .payment(4902201, "123456", 100)
             .slice(2, 12)
             .should.equal("0004902201"));
       });
       describe("position 13-37", () => {
         it("should equal the OCR reference", () =>
           bankgirot
-            .payment("490-2201", "123456", 100)
+            .payment(4902201, "123456", 100)
             .slice(12, 37)
             .should.equal("123456                   "));
       });
       describe("position 38-49", () => {
         it("should equal the amount", () =>
           bankgirot
-            .payment("490-2201", "123456", 100)
+            .payment(4902201, "123456", 100)
             .slice(37, 49)
             .should.equal("000000010000"));
 
         it("should include two decimals", () =>
           bankgirot
-            .payment("490-2201", "123456", 3.1415)
+            .payment(4902201, "123456", 3.1415)
             .slice(37, 49)
             .should.equal("000000000314"));
       });
@@ -381,14 +381,14 @@ describe("bankgirot", () => {
 
           it("should equal the payment date in ÅÅMMDD format", () =>
             bankgirot
-              .payment("490-2201", "123456", 100, paymentDate)
+              .payment(4902201, "123456", 100, paymentDate)
               .slice(49, 55)
               .should.equal("190215"));
         });
         describe("immidate payment", () => {
           it("should equal the string 'GENAST'", () =>
             bankgirot
-              .payment("490-2201", "123456", 100)
+              .payment(4902201, "123456", 100)
               .slice(49, 55)
               .should.equal("GENAST"));
         });
@@ -397,7 +397,7 @@ describe("bankgirot", () => {
       describe("position 56-60", () => {
         it("should be blank spaces", () =>
           bankgirot
-            .payment("490-2201", "123456", 100)
+            .payment(4902201, "123456", 100)
             .slice(55, 60)
             .should.equal("     "));
       });
@@ -405,13 +405,13 @@ describe("bankgirot", () => {
       describe("position 61-80", () => {
         it("should include the information text", () =>
           bankgirot
-            .payment("490-2201", "123456", 100, undefined, "Lorem ipsum.")
+            .payment(4902201, "123456", 100, undefined, "Lorem ipsum.")
             .slice(60, 80)
             .should.include("Lorem ipsum."));
       });
 
       it("should be exactly 80 characters long", () =>
-        bankgirot.payment("490-2201", "123456", 100).length.should.equal(80));
+        bankgirot.payment(4902201, "123456", 100).length.should.equal(80));
     });
 
     describe("summary (TK29)", () => {

@@ -55,6 +55,36 @@ const file = new bankgirot.File(customerNumber, seal, orders);
 file.pipe(fs.createWriteStream(file.filename));
 ```
 
+## Payroll och direct payments
+
+The example above shows a normal payment between one Bankgiro account and another. But Bankgirot also supports payments directly to all Swedish bank accounts, as well as payment by cheque if the receiver does not have a bank account or the account number is unknown. Direct deposit and cheque payments are commonly used for payroll payments to individuals.
+
+You can create direct deposit and cheque payments by using the `bankgirot.PaymentCheque` and `bankgirot.PaymentDeposit` classes.
+
+```typescript
+const payments = [
+  new bankgirot.PaymentCheque(
+    1, // This is a unique serial number for this payment receiver.
+    "John Doe", // Name of the receiver.
+    {
+      street: "Sveavägen 1",
+      postalCode: "100 21",
+      city: "Stockholm"
+    },
+    "99991234567890001", // OCR reference
+    1000 // Amount
+  ),
+  new bankgirot.PaymentDeposit(
+    1, // Serial number. It is important that these are unique per receiver.
+    "1234", // Clearing number for the bank.
+    "9988776655", // Bank account number.
+    "99991234567890001", // OCR reference
+    1000, // Amount
+    "Hello" // A message shown on the receivers account statement.
+  )
+];
+```
+
 ## Getting started
 
 ```sh

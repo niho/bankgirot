@@ -1,6 +1,8 @@
 import * as chai from "chai";
 import { Order } from "../src/order";
 import { Payment } from "../src/payment";
+import { PaymentCheque } from "../src/payment_cheque";
+import { PaymentDeposit } from "../src/payment_deposit";
 
 chai.should();
 
@@ -76,6 +78,41 @@ describe("bankgirot", () => {
         order.toPosts()[1].should.include("Fakturanummer");
         order.toPosts()[1].should.include("Belopp");
       });
+    });
+  });
+
+  describe("order with cheque payments", () => {
+    const payments = [
+      new PaymentCheque(
+        1,
+        "John Doe",
+        { street: "Sveavägen 1", postalCode: "100 21", city: "Stockholm" },
+        "99991234567890001",
+        1000
+      )
+    ];
+    const order = new Order("490-2201", payments);
+
+    describe("toPosts()", () => {
+      it("should return posts", () => order.toPosts().length.should.equal(5));
+    });
+  });
+
+  describe("order with deposit payments", () => {
+    const payments = [
+      new PaymentDeposit(
+        1,
+        "1234",
+        "9988776655",
+        "99991234567890001",
+        1000,
+        "Hello"
+      )
+    ];
+    const order = new Order("490-2201", payments);
+
+    describe("toPosts()", () => {
+      it("should return posts", () => order.toPosts().length.should.equal(5));
     });
   });
 });
