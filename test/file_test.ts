@@ -1,6 +1,6 @@
 import * as chai from "chai";
 import * as stream from "stream";
-import { File, TransferMethod } from "../src/file";
+import { File, ProductCode } from "../src/file";
 import { Order } from "../src/order";
 import { Payment } from "../src/payment";
 import { HashType, Seal } from "../src/seal";
@@ -82,7 +82,7 @@ describe("bankgirot", () => {
 
     describe("filename", () => {
       const filename = File.filename(
-        TransferMethod.FileTransfer,
+        ProductCode.SupplierPayment,
         customerNumber
       );
       const parts = filename.split(".");
@@ -98,13 +98,13 @@ describe("bankgirot", () => {
         describe("transfer method", () => {
           describe("BankgiroLink", () => {
             it("should be 'IBGLK'", () =>
-              File.filename(TransferMethod.BankgiroLink, customerNumber)
+              File.filename(ProductCode.BankgiroLink, customerNumber)
                 .split(".")[1]
                 .should.equal("IBGLK"));
           });
           describe("FileTransfer", () => {
             it("should be 'ILBLB'", () =>
-              File.filename(TransferMethod.FileTransfer, customerNumber)
+              File.filename(ProductCode.SupplierPayment, customerNumber)
                 .split(".")[1]
                 .should.equal("ILBLB"));
           });

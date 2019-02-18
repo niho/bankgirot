@@ -3,27 +3,29 @@ import * as stream from "stream";
 import { Order } from "./order";
 import { Seal } from "./seal";
 
-export enum TransferMethod {
+export enum ProductCode {
   BankgiroLink = "IBGLK",
-  FileTransfer = "ILBLB",
   BankgiroLinkTest = "IBGZK",
-  FileTransferTest = "ILBZZ",
+  SupplierPayment = "ILBLB",
+  SupplierPaymentTest = "ILBZZ",
+  Payroll = "IKIKI",
+  PayrollTest = "IKIZZ",
   Test = "IZZZZ"
 }
 
 export class File extends stream.Readable {
   public static filename(
-    transferMethod: TransferMethod,
+    productCode: ProductCode,
     customerNumber: string
   ): string {
     return [
       "BFEP",
-      transferMethod,
+      productCode,
       sprintf("K0%06d", parseInt(customerNumber, 10))
     ].join(".");
   }
 
-  public readonly transferMethod: TransferMethod;
+  public readonly productCode: ProductCode;
   public readonly customerNumber: string;
   public readonly seal: Seal;
   public readonly orders: Order[];
@@ -33,17 +35,17 @@ export class File extends stream.Readable {
     customerNumber: string,
     seal: Seal,
     orders: Order[],
-    transferMethod: TransferMethod = TransferMethod.FileTransfer
+    productCode: ProductCode = ProductCode.SupplierPayment
   ) {
     super();
     if (orders.length === 0) {
       throw new Error("Empty files with no orders is not allowed.");
     }
-    this.transferMethod = transferMethod;
+    this.productCode = productCode;
     this.customerNumber = customerNumber;
     this.orders = orders;
     this.seal = seal;
-    this.filename = File.filename(this.transferMethod, this.customerNumber);
+    this.filename = File.filename(this.productCode, this.customerNumber);
   }
 
   public _read(_size: number) {
