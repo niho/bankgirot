@@ -81,16 +81,14 @@ describe("bankgirot", () => {
     });
 
     describe("filename", () => {
-      const date = new Date("2019-02-15T12:00:00Z");
       const filename = File.filename(
         TransferMethod.FileTransfer,
-        customerNumber,
-        date
+        customerNumber
       );
       const parts = filename.split(".");
 
-      it("should have 5 parts separated by '.'", () =>
-        parts.length.should.equal(5));
+      it("should have 3 parts separated by '.'", () =>
+        parts.length.should.equal(3));
 
       describe("part 1", () => {
         it("should always be 'BFEP'", () => parts[0].should.equal("BFEP"));
@@ -100,13 +98,13 @@ describe("bankgirot", () => {
         describe("transfer method", () => {
           describe("BankgiroLink", () => {
             it("should be 'IBGLK'", () =>
-              File.filename(TransferMethod.BankgiroLink, customerNumber, date)
+              File.filename(TransferMethod.BankgiroLink, customerNumber)
                 .split(".")[1]
                 .should.equal("IBGLK"));
           });
           describe("FileTransfer", () => {
             it("should be 'ILBLB'", () =>
-              File.filename(TransferMethod.FileTransfer, customerNumber, date)
+              File.filename(TransferMethod.FileTransfer, customerNumber)
                 .split(".")[1]
                 .should.equal("ILBLB"));
           });
@@ -119,22 +117,6 @@ describe("bankgirot", () => {
           parts[2].should.match(/123456$/));
         it("should be 8 characters long", () =>
           parts[2].length.should.equal(8));
-      });
-
-      describe("part 4", () => {
-        it("should start with 'D'", () => parts[3].should.match(/^D/));
-        it("should contain the current date", () =>
-          parts[3].should.match(/190215$/));
-        it("should be 7 characters long", () =>
-          parts[3].length.should.equal(7));
-      });
-
-      describe("part 5", () => {
-        it("should start with 'T'", () => parts[4].should.match(/^T/));
-        it("should contain the current time", () =>
-          parts[4].should.match(/120000$/));
-        it("should be 7 characters long", () =>
-          parts[4].length.should.equal(7));
       });
     });
   });

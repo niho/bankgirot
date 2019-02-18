@@ -1,7 +1,7 @@
+import { sprintf } from "sprintf-js";
 import * as stream from "stream";
 import { Order } from "./order";
 import { Seal } from "./seal";
-import { dateStr, timeStr } from "./utils";
 
 export enum TransferMethod {
   BankgiroLink = "IBGLK",
@@ -14,21 +14,17 @@ export enum TransferMethod {
 export class File extends stream.Readable {
   public static filename(
     transferMethod: TransferMethod,
-    customerNumber: string,
-    date: Date
+    customerNumber: string
   ): string {
     return [
       "BFEP",
       transferMethod,
-      `K0${customerNumber}`,
-      `D${dateStr(date)}`,
-      `T${timeStr(date)}`
+      sprintf("K0%06d", parseInt(customerNumber, 10))
     ].join(".");
   }
 
   public readonly transferMethod: TransferMethod;
   public readonly customerNumber: string;
-  public readonly date: Date;
   public readonly seal: Seal;
   public readonly orders: Order[];
   public readonly filename: string;
@@ -43,16 +39,11 @@ export class File extends stream.Readable {
     if (orders.length === 0) {
       throw new Error("Empty files with no orders is not allowed.");
     }
-    this.date = new Date();
     this.transferMethod = transferMethod;
     this.customerNumber = customerNumber;
     this.orders = orders;
     this.seal = seal;
-    this.filename = File.filename(
-      this.transferMethod,
-      this.customerNumber,
-      this.date
-    );
+    this.filename = File.filename(this.transferMethod, this.customerNumber);
   }
 
   public _read(_size: number) {
