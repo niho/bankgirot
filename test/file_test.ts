@@ -1,4 +1,5 @@
 import * as chai from "chai";
+import * as stream from "stream";
 import { File, TransferMethod } from "../src/file";
 import { Order } from "../src/order";
 import { Payment } from "../src/payment";
@@ -6,14 +7,18 @@ import { HashType, Seal } from "../src/seal";
 
 chai.should();
 
+function isASCII(str: string, extended: boolean) {
+  return (extended ? /^[\x00-\xFF]*$/ : /^[\x00-\x7F]*$/).test(str);
+}
+
 describe("bankgirot", () => {
   describe("file", () => {
     const customerNumber = "123456";
-    const seal = new Seal(HashType.HMAC_SHA_256, new Date(), "");
 
     describe("without orders", () => {
       it("should throw an exception", () => {
         chai.should().throw(() => {
+          const seal = new Seal(HashType.HMAC_SHA_256, new Date(), "");
           new File(customerNumber, seal, []); // tslint:disable-line
         });
       });
@@ -24,26 +29,45 @@ describe("bankgirot", () => {
         new Payment("123-4567", "99991234567890001", 1000),
         new Payment("123-8901", "99991234567890002", 1230)
       ];
-      const file = new File(customerNumber, seal, [
+      const orders = [
         new Order("490-2201", payments),
         new Order("490-22012", payments)
-      ]);
+      ];
 
       describe("stream", () => {
-        it("should be ASCII");
-        it("should use ISO8859-1");
-        it("should use <CRLF> between posts");
+        const onStream = (
+          onChunk: (chunk: string | Buffer) => void,
+          done: (err?: Error) => void
+        ) => {
+          const seal = new Seal(HashType.HMAC_SHA_256, new Date(), "");
+          const file = new File(customerNumber, seal, orders);
+          const writable = new stream.Writable({
+            write(chunk, _encoding, callback) {
+              onChunk(chunk);
+              callback();
+            }
+          });
+          file.on("end", done).pipe(writable);
+        };
 
-        it("should write to a stream", done => {
-          // const writable = new stream.Writable({
-          //   write(chunk, encoding, callback) {
-          //     chunk.length.should.equal(80);
-          //     encoding.should.equal("latin1");
-          //     callback();
-          //   }
-          // });
-          // writable.on("end", done);
-          file.on("end", done).pipe(process.stdout);
+        it("should have a line length of 80 characters", done => {
+          onStream(chunk => {
+            if (chunk.toString() !== "\r\n") {
+              chunk.length.should.equal(80);
+            }
+          }, done);
+        });
+
+        it("should be ASCII and use ISO8859-1", done => {
+          onStream(chunk => {
+            isASCII(chunk.toString("latin1"), true).should.equal(true);
+          }, done);
+        });
+
+        it("should use <CRLF> between posts", done => {
+          onStream(chunk => {
+            isASCII(chunk.toString("latin1"), true).should.equal(true);
+          }, done);
         });
       });
     });
