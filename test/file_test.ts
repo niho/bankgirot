@@ -25,14 +25,8 @@ describe("bankgirot", () => {
     });
 
     describe("with orders", () => {
-      const payments = [
-        new Payment("123-4567", "99991234567890001", 1000),
-        new Payment("123-8901", "99991234567890002", 1230)
-      ];
-      const orders = [
-        new Order("490-2201", payments),
-        new Order("490-22012", payments)
-      ];
+      const payments = [new Payment("991-2346", "99991234567890001", 1000)];
+      const orders = [new Order("490-2201", payments)];
 
       describe("stream", () => {
         const onStream = (
@@ -68,6 +62,20 @@ describe("bankgirot", () => {
           onStream(chunk => {
             isASCII(chunk.toString("latin1"), true).should.equal(true);
           }, done);
+        });
+      });
+    });
+
+    describe.skip("with multiple orders from the same account", () => {
+      it("should throw an exception", () => {
+        chai.should().throw(() => {
+          const payments = [new Payment("991-2346", "99991234567890001", 1000)];
+          const orders = [
+            new Order("490-2201", payments),
+            new Order("490-2201", payments)
+          ];
+          const seal = new Seal(HashType.HMAC_SHA_256, new Date(), "");
+          new File(customerNumber, seal, orders); // tslint:disable-line
         });
       });
     });
