@@ -1,15 +1,23 @@
 import { Payment } from "./payment";
 import * as posts from "./posts";
 
-export interface IInfo {
+interface IInfo {
   readonly text: string;
   readonly endDate?: Date;
 }
 
-export interface IHeaders {
+interface IHeaders {
   readonly specHeader: string;
   readonly amountHeader: string;
 }
+
+interface IOptions {
+  paymentDate?: Date;
+  info?: IInfo;
+  headers?: IHeaders;
+}
+
+export type Options = IOptions;
 
 export class Order {
   public readonly bankgiroNr: string;
@@ -19,22 +27,16 @@ export class Order {
   public readonly info?: IInfo;
   public readonly headers?: IHeaders;
 
-  constructor(
-    bankgiroNr: string,
-    payments: Payment[],
-    paymentDate?: Date,
-    info?: IInfo,
-    headers?: IHeaders
-  ) {
+  constructor(bankgiroNr: string, payments: Payment[], options: Options = {}) {
     if (payments.length === 0) {
       throw new Error("Empty orders with no payments is not allowed.");
     }
     this.bankgiroNr = bankgiroNr;
     this.payments = payments;
     this.date = new Date();
-    this.paymentDate = paymentDate;
-    this.info = info;
-    this.headers = headers;
+    this.paymentDate = options.paymentDate;
+    this.info = options.info;
+    this.headers = options.headers;
   }
 
   public toPosts() {
